@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3">Your Repositories</h1>
+    <a class="btn btn-primary" href="{% url 'repository_upload' %}">Upload ZIP</a>
+</div>
+
+{% if repositories %}
+    <div class="list-group">
+        {% for repo in repositories %}
+            <a class="list-group-item list-group-item-action" href="{% url 'repository_detail' repo.id %}">
+                <div class="d-flex justify-content-between">
+                    <strong>{{ repo.name }}</strong>
+                    <span class="badge text-bg-secondary">{{ repo.status }}</span>
+                </div>
+                <small>{{ repo.total_files }} files | {{ repo.languages|default:"No languages detected" }}</small>
+            </a>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">Upload a repository ZIP to begin.</div>
+{% endif %}
+{% endblock %}

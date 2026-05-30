@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h1 class="h3">{{ repository.name }}</h1>
+        <p class="text-muted mb-0">{{ repository.overview }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        {% if repository.status == "processed" %}
+            <a class="btn btn-primary" href="{% url 'repository_chat' repository.id %}">Chat</a>
+        {% endif %}
+        {% if repository.status == "failed" %}
+            {# Bug 7: retry button for failed repos #}
+            <form method="post" action="{% url 'repository_reprocess' repository.id %}">
+                {% csrf_token %}
+                <button class="btn btn-warning" type="submit">Retry Processing</button>
+            </form>
+        {% endif %}
+        {# Bug 6: delete button #}
+        <a class="btn btn-outline-danger" href="{% url 'repository_delete' repository.id %}">Delete</a>
+    </div>
+</div>
+
+{% if repository.status == "failed" %}
+    <div class="alert alert-danger">{{ repository.error_message }}</div>
+{% endif %}
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card card-body">
+            <strong>Total Files</strong>
+            <span>{{ repository.total_files }}</span>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-body">
+            <strong>Languages</strong>
+            <span>{{ repository.languages|default:"None" }}</span>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-body">
+            <strong>Main Folders</strong>
+            <span>{{ repository.main_folders|default:"None" }}</span>
+        </div>
+    </div>
+</div>
+
+<h2 class="h5">Indexed Files</h2>
+<div class="list-group">
+    {% for file in files %}
+        <div class="list-group-item">
+            <code>{{ file.path }}</code>
+            <small class="text-muted">({{ file.extension }}, {{ file.size }} bytes)</small>
+        </div>
+    {% empty %}
+        <div class="alert alert-info">No supported files indexed.</div>
+    {% endfor %}
+</div>
+{% endblock %}

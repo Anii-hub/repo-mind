@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h1 class="h3 mb-3">Delete Repository</h1>
+        <div class="card card-body">
+            <p>
+                Are you sure you want to delete
+                <strong>{{ repository.name }}</strong>?
+                This will permanently remove the repository, all indexed files, and all
+                chat history. This action cannot be undone.
+            </p>
+            <div class="d-flex gap-2">
+                <a class="btn btn-secondary" href="{% url 'repository_detail' repository.id %}">Cancel</a>
+                <form method="post">
+                    {% csrf_token %}
+                    <button class="btn btn-danger" type="submit">Yes, Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
