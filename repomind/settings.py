@@ -101,8 +101,11 @@ LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
 
-FILE_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024
-DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024
+# Max ZIP upload is 50 MB (matches RepositoryUploadForm.clean_zip_file validation)
+# DATA_UPLOAD_MAX_MEMORY_SIZE must be >= FILE_UPLOAD_MAX_MEMORY_SIZE to avoid 400s
+FILE_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024   # 50 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024   # 50 MB
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 100  # safety guard
 
 # Bug 17: Security cookie flags — use secure cookies in production (non-DEBUG)
 SESSION_COOKIE_SECURE = not DEBUG
