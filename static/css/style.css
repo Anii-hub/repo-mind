@@ -1,9 +1,9 @@
 body {
-    background: #f8f9fa;
+    background: #f0f2f5;
 }
 
 .card {
-    border-radius: 8px;
+    border-radius: 10px;
 }
 
 .white-space-pre {
@@ -12,4 +12,136 @@ body {
 
 textarea {
     resize: vertical;
+}
+
+/* ── Auth pages (login & register) ── */
+.auth-page {
+    min-height: calc(100vh - 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 2.2rem 2rem 1.8rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.04), 0 12px 32px rgba(0,0,0,0.08);
+}
+
+.auth-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.2rem;
+    margin: 0 auto 1.2rem;
+}
+
+.auth-card h1 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 0.2rem;
+    text-align: center;
+}
+
+.auth-card .auth-sub {
+    font-size: 0.85rem;
+    color: #6c757d;
+    text-align: center;
+    margin-bottom: 1.8rem;
+}
+
+/* Tighten up Django's form.as_p output */
+.auth-card p { margin-bottom: 0; }
+.auth-card label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.3rem;
+    display: block;
+    margin-top: 1rem;
+}
+.auth-card input[type="text"],
+.auth-card input[type="password"],
+.auth-card input[type="email"] {
+    width: 100%;
+    padding: 0.55rem 0.8rem;
+    border: 1.5px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 0.93rem;
+    color: #212529;
+    background: #f8f9fa;
+    transition: border-color 0.18s, box-shadow 0.18s;
+}
+.auth-card input[type="text"]:focus,
+.auth-card input[type="password"]:focus,
+.auth-card input[type="email"]:focus {
+    outline: none;
+    border-color: #6366f1;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+}
+
+.auth-card ul.errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 0.2rem 0 0;
+}
+.auth-card ul.errorlist li {
+    font-size: 0.78rem;
+    color: #dc3545;
+}
+.auth-card .helptext {
+    display: block;
+    font-size: 0.75rem;
+    color: #adb5bd;
+    margin-top: 0.25rem;
+    line-height: 1.4;
+}
+
+.auth-btn {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 0.65rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    cursor: pointer;
+    transition: opacity 0.18s, transform 0.15s;
+    box-shadow: 0 3px 12px rgba(99,102,241,0.35);
+}
+.auth-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+.auth-btn:active {
+    transform: translateY(0);
+}
+
+.auth-footer-link {
+    text-align: center;
+    margin-top: 1.4rem;
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+.auth-footer-link a {
+    color: #6366f1;
+    font-weight: 600;
+    text-decoration: none;
+}
+.auth-footer-link a:hover {
+    text-decoration: underline;
 }
