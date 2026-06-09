@@ -28,5 +28,15 @@ services:
         sync: false   # Paste your Groq key in Render dashboard
       - key: GROQ_MODEL
         value: llama-3.1-8b-instant
+      - key: REPOMIND_MAX_FILE_BYTES
+        value: "262144"
+      - key: REPOMIND_MAX_FILES
+        value: "150"
+      - key: REPOMIND_MAX_ZIP_MEMBERS
+        value: "5000"
+      - key: REPOMIND_MAX_EXTRACTED_BYTES
+        value: "78643200"
+      - key: REPOMIND_EMBEDDING_BATCH_SIZE
+        value: "16"
       - key: PYTHON_VERSION
         value: "3.11.0"
