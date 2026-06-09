@@ -1,29 +1,55 @@
 {% extends "base.html" %}
 
+{% block title %}Chat — {{ repository.name }}{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3">Chat: {{ repository.name }}</h1>
-    <a class="btn btn-outline-secondary" href="{% url 'repository_detail' repository.id %}">Details</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Chat</h1>
+        <span class="text-muted small">{{ repository.name }}</span>
+    </div>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'repository_detail' repository.id %}">
+        <i class="bi bi-arrow-left"></i> Back to Details
+    </a>
 </div>
 
-<form method="post" class="card card-body mb-4">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button class="btn btn-primary" type="submit">Ask</button>
-</form>
+<div class="chat-messages-wrapper mb-4" id="chat-messages">
+    {% for message in chat_messages %}
+        <div class="chat-bubble-group mb-3">
+            <div class="chat-bubble chat-bubble-user">
+                <span class="chat-label">You</span>
+                <p class="mb-0">{{ message.question }}</p>
+            </div>
+            <div class="chat-bubble chat-bubble-ai mt-2">
+                <span class="chat-label">RepoMind AI</span>
+                <p class="mb-0">{{ message.answer|linebreaksbr }}</p>
+            </div>
+        </div>
+    {% empty %}
+        <div class="alert alert-info">
+            <i class="bi bi-chat-dots me-2"></i>Ask your first question about this repository.
+        </div>
+    {% endfor %}
+</div>
 
-{% for message in chat_messages %}
-    <div class="mb-3">
-        <div class="card card-body bg-light">
-            <strong>You</strong>
-            <p class="mb-0">{{ message.question }}</p>
-        </div>
-        <div class="card card-body mt-2">
-            <strong>RepoMind AI</strong>
-            <p class="mb-0 white-space-pre">{{ message.answer }}</p>
-        </div>
-    </div>
-{% empty %}
-    <div class="alert alert-info">Ask a question about this repository.</div>
-{% endfor %}
+<div class="chat-input-card" id="chat-input-anchor">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-primary mt-2" type="submit">
+            <i class="bi bi-send me-1"></i> Ask
+        </button>
+    </form>
+</div>
+
+<script>
+    // Auto-scroll to the bottom of chat messages on page load
+    (function () {
+        var anchor = document.getElementById("chat-input-anchor");
+        if (anchor) {
+            anchor.scrollIntoView({ behavior: "smooth", block: "end" });
+        }
+    })();
+</script>
 {% endblock %}
+

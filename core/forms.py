@@ -36,12 +36,14 @@ class RepositoryUploadForm(forms.ModelForm):
         if zip_file:
             if not zip_file.name.lower().endswith(".zip"):
                 raise forms.ValidationError("Please upload a ZIP file.")
-            # File-size guard: reject ZIPs larger than 50 MB at the form layer
-            max_bytes = 50 * 1024 * 1024  # 50 MB
+            # File-size guard: 100 MB ceiling. Safe because FILE_UPLOAD_MAX_MEMORY_SIZE=2 MB
+            # means the ZIP streams to a temp file on disk — it never sits in RAM.
+            # Processing memory is bounded by MAX_FILE_BYTES (500 KB/file), not ZIP size.
+            max_bytes = 100 * 1024 * 1024  # 100 MB
             if zip_file.size > max_bytes:
                 raise forms.ValidationError(
                     f"ZIP file is too large ({zip_file.size // (1024 * 1024)} MB). "
-                    "Maximum allowed size is 50 MB."
+                    "Maximum allowed size is 100 MB."
                 )
         return zip_file
 

@@ -20,9 +20,6 @@ urlpatterns = [
     ),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-else:
-    # Serve media files via Django in production (no external CDN on Render free tier)
-    # For production at scale, replace with django-storages + S3/Cloudflare R2
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve uploaded media files in development.
+# In production, replace with django-storages + S3 / Cloudflare R2.
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

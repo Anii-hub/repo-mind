@@ -6,8 +6,13 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-CHUNK_SIZE = 1200
-CHUNK_OVERLAP = 200
+# Chunk settings — these directly control how many embeddings are generated.
+# Larger CHUNK_SIZE = fewer chunks = fewer neural network passes = faster indexing.
+# CHUNK_OVERLAP keeps context across chunk boundaries; 50 chars is enough for code.
+# Step between chunks = CHUNK_SIZE - CHUNK_OVERLAP = 1950 chars (was 1000).
+# Effect: ~2x fewer chunks for the same codebase → ~2x faster embedding.
+CHUNK_SIZE    = 2000   # was 1200
+CHUNK_OVERLAP = 50     # was 200
 COLLECTION_NAME = "repository_chunks"
 
 _embedding_model = None
@@ -76,8 +81,10 @@ def retrieve_relevant_chunks(repository, query, limit=5):
     collection = get_collection()
 
     try:
-        # Count how many chunks exist for this repository specifically
-        existing = collection.get(where={"repository_id": repository.id})
+        # Count how many chunks exist for this repository.
+        # include=[] means "return IDs only" — no documents, embeddings, or metadata
+        # are fetched, making this O(count) in ID space rather than O(N*doc_size).
+        existing = collection.get(where={"repository_id": repository.id}, include=[])
         available = len(existing.get("ids", []))
         if available == 0:
             logger.debug("No indexed chunks found for repository %s.", repository.id)
@@ -110,7 +117,8 @@ def delete_repository_chunks(repository_id):
     """Remove all ChromaDB vectors associated with a repository."""
     try:
         collection = get_collection()
-        existing = collection.get(where={"repository_id": repository_id})
+        # include=[] fetches IDs only — no documents or embeddings are loaded into RAM
+        existing = collection.get(where={"repository_id": repository_id}, include=[])
         ids_to_delete = existing.get("ids", [])
         if ids_to_delete:
             collection.delete(ids=ids_to_delete)

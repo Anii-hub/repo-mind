@@ -1,61 +1,181 @@
 {% extends "base.html" %}
 
+{% block title %}{{ repository.name }} — RepoMind AI{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-start mb-3">
+<div class="d-flex justify-content-between align-items-start mb-4">
     <div>
-        <h1 class="h3">{{ repository.name }}</h1>
-        <p class="text-muted mb-0">{{ repository.overview }}</p>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <a href="{% url 'dashboard' %}" class="text-muted text-decoration-none small">
+                <i class="bi bi-house me-1"></i>Dashboard
+            </a>
+            <span class="text-muted small">/</span>
+            <span class="small text-muted">{{ repository.name }}</span>
+        </div>
+        <h1 class="h3 mb-1">{{ repository.name }}</h1>
+        {% if repository.overview %}
+            <p class="text-muted mb-0 small">{{ repository.overview }}</p>
+        {% endif %}
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 align-items-center">
         {% if repository.status == "processed" %}
-            <a class="btn btn-primary" href="{% url 'repository_chat' repository.id %}">Chat</a>
+            <a class="btn btn-primary" href="{% url 'repository_chat' repository.id %}">
+                <i class="bi bi-chat-dots me-1"></i>Chat
+            </a>
         {% endif %}
         {% if repository.status == "failed" %}
-            {# Bug 7: retry button for failed repos #}
             <form method="post" action="{% url 'repository_reprocess' repository.id %}">
                 {% csrf_token %}
-                <button class="btn btn-warning" type="submit">Retry Processing</button>
+                <button class="btn btn-warning" type="submit">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Retry Processing
+                </button>
             </form>
         {% endif %}
-        {# Bug 6: delete button #}
-        <a class="btn btn-outline-danger" href="{% url 'repository_delete' repository.id %}">Delete</a>
+        <a class="btn btn-outline-danger btn-sm" href="{% url 'repository_delete' repository.id %}">
+            <i class="bi bi-trash me-1"></i>Delete
+        </a>
     </div>
 </div>
 
-{% if repository.status == "failed" %}
-    <div class="alert alert-danger">{{ repository.error_message }}</div>
+{% if repository.status == "processing" %}
+    <div class="alert alert-info d-flex align-items-center gap-2" id="status-alert">
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span>Indexing in progress — this page will update automatically when done.</span>
+    </div>
+{% elif repository.status == "failed" %}
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle me-2"></i><strong>Processing failed:</strong>
+        {{ repository.error_message }}
+    </div>
+{% elif repository.status == "processed" and repository.error_message %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-circle me-2"></i>{{ repository.error_message }}
+    </div>
 {% endif %}
 
 <div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card card-body">
-            <strong>Total Files</strong>
-            <span>{{ repository.total_files }}</span>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="bi bi-files"></i></div>
+            <div class="stat-value" id="stat-file-count">{{ repository.total_files }}</div>
+            <div class="stat-label">Files Indexed</div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card card-body">
-            <strong>Languages</strong>
-            <span>{{ repository.languages|default:"None" }}</span>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="bi bi-code-slash"></i></div>
+            <div class="stat-value" style="font-size:1rem;">{{ repository.languages|default:"—" }}</div>
+            <div class="stat-label">Languages</div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card card-body">
-            <strong>Main Folders</strong>
-            <span>{{ repository.main_folders|default:"None" }}</span>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="bi bi-folder2"></i></div>
+            <div class="stat-value" style="font-size:1rem;">{{ repository.main_folders|default:"—" }}</div>
+            <div class="stat-label">Main Folders</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon">
+                {% if repository.status == 'processed' %}
+                    <i class="bi bi-check-circle-fill" style="color:#10b981;"></i>
+                {% elif repository.status == 'processing' %}
+                    <i class="bi bi-arrow-repeat" style="color:#3b82f6;"></i>
+                {% elif repository.status == 'failed' %}
+                    <i class="bi bi-x-circle-fill" style="color:#ef4444;"></i>
+                {% else %}
+                    <i class="bi bi-clock" style="color:#6b7280;"></i>
+                {% endif %}
+            </div>
+            <div class="stat-value" style="font-size:1rem;">{{ repository.get_status_display }}</div>
+            <div class="stat-label">Status</div>
         </div>
     </div>
 </div>
 
-<h2 class="h5">Indexed Files</h2>
-<div class="list-group">
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h2 class="h5 mb-0">Indexed Files</h2>
+    {% if files %}
+        <span class="badge text-bg-secondary">showing up to 100</span>
+    {% endif %}
+</div>
+<div class="indexed-files-list">
     {% for file in files %}
-        <div class="list-group-item">
-            <code>{{ file.path }}</code>
-            <small class="text-muted">({{ file.extension }}, {{ file.size }} bytes)</small>
+        <div class="indexed-file-row">
+            <i class="bi bi-file-earmark-code text-muted me-2"></i>
+            <code class="file-path">{{ file.path }}</code>
+            <span class="file-meta">{{ file.extension }} · {{ file.size|filesizeformat }}</span>
         </div>
     {% empty %}
-        <div class="alert alert-info">No supported files indexed.</div>
+        <div class="alert alert-info mb-0">
+            <i class="bi bi-info-circle me-2"></i>No supported files indexed yet.
+        </div>
     {% endfor %}
 </div>
+
+{% if repository.status == "processing" %}
+<script>
+(function () {
+    "use strict";
+
+    var STATUS_URL = "{% url 'repository_status_api' repository.id %}";
+    var POLL_INTERVAL_MS = 4000;   // check every 4 seconds
+    var MAX_POLLS = 450;            // stop after 30 minutes (450 × 4s) — matches server timeout
+    var polls = 0;
+    var timerId = null;
+
+    // Elements we update in-place so the page never flickers
+    var alertBox   = document.getElementById("status-alert");
+    var fileCount  = document.getElementById("stat-file-count");
+
+    function poll() {
+        polls++;
+        if (polls > MAX_POLLS) {
+            // Safety: stop polling and tell the user
+            if (alertBox) {
+                alertBox.className = "alert alert-warning d-flex align-items-center gap-2";
+                alertBox.innerHTML =
+                    '<i class="bi bi-exclamation-circle"></i>' +
+                    '<span>Processing is taking longer than expected. ' +
+                    '<a href="javascript:location.reload()">Refresh</a> to check status.</span>';
+            }
+            return;
+        }
+
+        fetch(STATUS_URL, { credentials: "same-origin" })
+            .then(function (res) {
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                return res.json();
+            })
+            .then(function (data) {
+                if (data.status === "processing") {
+                    // Still running — update file count in-place if it changed
+                    if (fileCount && data.total_files > 0) {
+                        fileCount.textContent = data.total_files;
+                    }
+                    // Schedule next poll
+                    timerId = setTimeout(poll, POLL_INTERVAL_MS);
+                } else {
+                    // Done (processed or failed) — do ONE full reload to render
+                    // the Chat button, file list, and correct status icon
+                    window.location.reload();
+                }
+            })
+            .catch(function () {
+                // Network blip — retry silently
+                timerId = setTimeout(poll, POLL_INTERVAL_MS);
+            });
+    }
+
+    // Start polling after the first interval
+    timerId = setTimeout(poll, POLL_INTERVAL_MS);
+
+    // Stop polling if user navigates away (avoids ghost requests)
+    window.addEventListener("pagehide", function () {
+        if (timerId) clearTimeout(timerId);
+    });
+})();
+</script>
+{% endif %}
 {% endblock %}

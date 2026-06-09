@@ -29,4 +29,10 @@ urlpatterns = [
         views.repository_reprocess_view,
         name="repository_reprocess",
     ),
+    # Lightweight JSON endpoint polled by the detail page AJAX poller
+    path(
+        "repositories/<int:repository_id>/status.json",
+        views.repository_status_api,
+        name="repository_status_api",
+    ),
 ]

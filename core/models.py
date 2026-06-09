@@ -5,6 +5,7 @@ from django.db import models
 class Repository(models.Model):
     STATUS_CHOICES = (
         ("uploaded", "Uploaded"),
+        ("processing", "Processing"),
         ("processed", "Processed"),
         ("failed", "Failed"),
     )

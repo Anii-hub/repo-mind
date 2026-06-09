@@ -1,24 +1,61 @@
 {% extends "base.html" %}
 
+{% block title %}Dashboard — RepoMind AI{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3">Your Repositories</h1>
-    <a class="btn btn-primary" href="{% url 'repository_upload' %}">Upload ZIP</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Your Repositories</h1>
+        <p class="text-muted small mb-0">{{ repositories|length }} repositor{{ repositories|length|pluralize:"y,ies" }} uploaded</p>
+    </div>
+    <a class="btn btn-primary" href="{% url 'repository_upload' %}">
+        <i class="bi bi-cloud-upload me-1"></i>Upload ZIP
+    </a>
 </div>
 
 {% if repositories %}
-    <div class="list-group">
+    <div class="repo-grid">
         {% for repo in repositories %}
-            <a class="list-group-item list-group-item-action" href="{% url 'repository_detail' repo.id %}">
-                <div class="d-flex justify-content-between">
-                    <strong>{{ repo.name }}</strong>
-                    <span class="badge text-bg-secondary">{{ repo.status }}</span>
+            <a class="repo-card" href="{% url 'repository_detail' repo.id %}">
+                <div class="repo-card-header">
+                    <div class="repo-icon">
+                        <i class="bi bi-folder2-open"></i>
+                    </div>
+                    {% if repo.status == 'processed' %}
+                        <span class="repo-status-badge status-processed">{{ repo.get_status_display }}</span>
+                    {% elif repo.status == 'processing' %}
+                        <span class="repo-status-badge status-processing">
+                            <span class="spinner-border spinner-border-sm me-1" role="status"></span>{{ repo.get_status_display }}
+                        </span>
+                    {% elif repo.status == 'failed' %}
+                        <span class="repo-status-badge status-failed">{{ repo.get_status_display }}</span>
+                    {% else %}
+                        <span class="repo-status-badge status-uploaded">{{ repo.get_status_display }}</span>
+                    {% endif %}
                 </div>
-                <small>{{ repo.total_files }} files | {{ repo.languages|default:"No languages detected" }}</small>
+                <h2 class="repo-card-name">{{ repo.name }}</h2>
+                <p class="repo-card-meta">
+                    <i class="bi bi-file-code me-1"></i>{{ repo.total_files }} files
+                    {% if repo.languages %}
+                        &nbsp;·&nbsp;<i class="bi bi-code-slash me-1"></i>{{ repo.languages }}
+                    {% endif %}
+                </p>
+                <p class="repo-card-date">
+                    <i class="bi bi-clock me-1"></i>{{ repo.created_at|date:"M d, Y" }}
+                </p>
             </a>
         {% endfor %}
     </div>
 {% else %}
-    <div class="alert alert-info">Upload a repository ZIP to begin.</div>
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="bi bi-folder-x"></i>
+        </div>
+        <h2 class="h5 mb-2">No repositories yet</h2>
+        <p class="text-muted mb-4">Upload a ZIP of your codebase and start chatting with it using AI.</p>
+        <a href="{% url 'repository_upload' %}" class="btn btn-primary">
+            <i class="bi bi-cloud-upload me-1"></i>Upload your first repository
+        </a>
+    </div>
 {% endif %}
 {% endblock %}
