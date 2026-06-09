@@ -65,12 +65,23 @@ TEMPLATES = [
 WSGI_APPLICATION = "repomind.wsgi.application"
 
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+_DATABASE_URL = os.getenv("DATABASE_URL")
+if _DATABASE_URL:
+    # Production: Render injects DATABASE_URL when a PostgreSQL instance is linked.
+    # dj-database-url parses the URL into Django's DATABASES format.
+    # conn_max_age=600 keeps connections alive for 10 min (reduces connection overhead).
+    import dj_database_url
+    DATABASES = {
+        "default": dj_database_url.parse(_DATABASE_URL, conn_max_age=600)
     }
-}
+else:
+    # Local development: fall back to SQLite — no setup required.
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 AUTH_PASSWORD_VALIDATORS = [
